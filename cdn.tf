@@ -23,7 +23,7 @@ module "cdn" {
 }
 
 locals {
-  links_to_map = merge(values({ for key, value in local.links: key => { for link in value: link => key } })...)
+  links_to_map = merge(values({ for key, value in local.links : key => { for link in value : link => key } })...)
 }
 
 resource "aws_s3_bucket_object" "websitefiles" {
