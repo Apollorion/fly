@@ -4,6 +4,8 @@
 <p align="center">FLY - Shortlinks for engineers.</p>
 <p align="center">http://fly.apollorion.com/</p>
 
+[![main](https://github.com/Apollorion/fly/actions/workflows/main.yml/badge.svg)](https://github.com/Apollorion/fly/actions/workflows/main.yml)
+
 # What is FLY?
 Im an engineer and it annoys me that I have to go through a sales portal to get where I need.  
 For instance, `datadog.com` takes me to `datadoghq.com`'s main landing page instead of directly to `app.datadoghq.com/`.  
