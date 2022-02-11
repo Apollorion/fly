@@ -22,8 +22,12 @@ module "cdn" {
   }]
 }
 
+locals {
+  links_to_map = merge(values({ for key, value in local.links: key => { for link in value: link => key } })...)
+}
+
 resource "aws_s3_bucket_object" "websitefiles" {
-  for_each         = local.links
+  for_each         = local.links_to_map
   bucket           = module.cdn.s3_bucket
   key              = each.key
   source           = ""
@@ -43,4 +47,8 @@ resource "aws_s3_bucket_object" "index" {
   etag             = md5("https://github.com/apollorion/fly")
   website_redirect = "https://github.com/apollorion/fly"
   tags             = {}
+}
+
+output "links" {
+  value = local.links_to_map
 }
