@@ -1,0 +1,22 @@
+{
+  "name": "fly",
+  "description": "fly to your bookmarks",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "omnibox": {
+    "keyword": "fly"
+  },
+  "icons": {
+    "16": "img.png",
+    "32": "img.png",
+    "64": "img.png"
+  },
+  "permissions": [
+    "bookmarks",
+    "tabs"
+  ],
+  "background": {
+    "persistent": false,
+    "scripts": ["background.js"]
+  }
+}
