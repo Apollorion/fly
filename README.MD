@@ -1,5 +1,5 @@
 <p align="center">
-   <img src="https://github.com/Apollorion/fly/blob/master/icon.png?raw=true">
+   <img src="https://github.com/Apollorion/fly/blob/main/extension/img.png?raw=true">
 </p>
 <p align="center">FLY - Shortlinks for engineers.</p>
 <p align="center">http://fly.apollorion.com/</p>
