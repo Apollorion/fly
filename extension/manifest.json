@@ -16,7 +16,6 @@
     "tabs"
   ],
   "background": {
-    "persistent": false,
-    "scripts": ["background.js"]
+    "service_worker": "background.js"
   }
 }
