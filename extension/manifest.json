@@ -1,7 +1,7 @@
 {
-  "name": "fly",
-  "description": "fly to great websites",
-  "version": "0.0.2",
+  "name": "Fly",
+  "description": "Fly is a software engineers best friend.",
+  "version": "0.1.0",
   "manifest_version": 3,
   "omnibox": {
     "keyword": "fly"
@@ -12,7 +12,7 @@
     "64": "img.png"
   },
   "permissions": [
-    "bookmarks",
+    "storage",
     "tabs"
   ],
   "background": {
