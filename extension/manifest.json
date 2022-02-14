@@ -2,7 +2,7 @@
   "name": "fly",
   "description": "fly to your bookmarks",
   "version": "0.0.1",
-  "manifest_version": 2,
+  "manifest_version": 3,
   "omnibox": {
     "keyword": "fly"
   },

@@ -1,3 +1,7 @@
+locals {
+  github_url = "https://github.com/apollorion/fly"
+}
+
 data "aws_route53_zone" "fly" {
   name = local.tld
 }
@@ -41,11 +45,11 @@ resource "aws_s3_bucket_object" "websitefiles" {
 resource "aws_s3_bucket_object" "index" {
   bucket           = module.cdn.s3_bucket
   key              = "index.html"
-  source           = ""
+  content          = "<html><head><meta http-equiv=\"refresh\" content=\"0; URL=${local.github_url}\"/></head></html>"
   acl              = "public-read"
   content_type     = "text/html"
   etag             = md5("https://github.com/apollorion/fly")
-  website_redirect = "https://github.com/apollorion/fly"
+  website_redirect = local.github_url
   tags             = {}
 }
 
