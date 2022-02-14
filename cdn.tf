@@ -54,13 +54,13 @@ resource "aws_s3_bucket_object" "index" {
 }
 
 resource "aws_s3_bucket_object" "four-oh-four" {
-  bucket           = module.cdn.s3_bucket
-  key              = "404.html"
-  content          = "<html><head><meta http-equiv=\"refresh\" content=\"0; URL=${local.github_url}\"/></head></html>"
-  acl              = "public-read"
-  content_type     = "text/html"
-  etag             = md5("https://github.com/apollorion/fly")
-  tags             = {}
+  bucket       = module.cdn.s3_bucket
+  key          = "404.html"
+  content      = "<html><head><meta http-equiv=\"refresh\" content=\"0; URL=${local.github_url}\"/></head></html>"
+  acl          = "public-read"
+  content_type = "text/html"
+  etag         = md5("https://github.com/apollorion/fly")
+  tags         = {}
 }
 
 output "links" {
