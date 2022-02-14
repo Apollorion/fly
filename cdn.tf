@@ -21,7 +21,7 @@ module "cdn" {
   custom_error_response = [{
     error_code            = 404
     response_code         = 200
-    response_page_path    = "/index.html"
+    response_page_path    = "/404.html"
     error_caching_min_ttl = 86400
   }]
 }
@@ -45,11 +45,21 @@ resource "aws_s3_bucket_object" "websitefiles" {
 resource "aws_s3_bucket_object" "index" {
   bucket           = module.cdn.s3_bucket
   key              = "index.html"
-  content          = "<html><head><meta http-equiv=\"refresh\" content=\"0; URL=${local.github_url}\"/></head></html>"
+  content          = ""
   acl              = "public-read"
   content_type     = "text/html"
   etag             = md5("https://github.com/apollorion/fly")
   website_redirect = local.github_url
+  tags             = {}
+}
+
+resource "aws_s3_bucket_object" "four-oh-four" {
+  bucket           = module.cdn.s3_bucket
+  key              = "404.html"
+  content          = "<html><head><meta http-equiv=\"refresh\" content=\"0; URL=${local.github_url}\"/></head></html>"
+  acl              = "public-read"
+  content_type     = "text/html"
+  etag             = md5("https://github.com/apollorion/fly")
   tags             = {}
 }
 
