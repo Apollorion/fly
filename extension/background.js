@@ -1,5 +1,7 @@
 const dev = false;
 
+const supportedLogicalFlights = ["gh", "aws"];
+
 async function main() {
     chrome.omnibox.onInputEntered.addListener((text, OnInputEnteredDisposition) => {
 
@@ -7,13 +9,18 @@ async function main() {
         if(query[0] === "set"){
             setCalled(query);
         } else {
-            switch(query[0]){
-                case "gh":
-                    goToGithub(query);
-                    break;
-                default:
-                    goToUrl(query);
-                    break;
+            if(supportedLogicalFlights.includes(query[0])){
+                const flightType = query[0];
+                switch(flightType){
+                    case "gh":
+                        goToGithub(query);
+                        break;
+                    default:
+                        goToLogicalFlight(query);
+                        break;
+                }
+            } else {
+                goToUrl(query);
             }
         }
 
@@ -21,16 +28,22 @@ async function main() {
 }
 
 async function goToGithub(query){
-    if(query.length !== 2){
-        return goToUrl(["config-github", "repo-not-set"]);
+    if(query.length === 3) {
+        return await goToLogicalFlight(query);
     }
 
     try {
         let org = await getLocalStorage("gh-org");
-        goToUrl(["logical", "gh", `${org}-${query[1]}`]);
+        return await goToUrl(["flight", "gh", `${org}-${query[1]}`]);
     } catch {
-        goToUrl(["config-github", "org-not-set"]);
+        return await goToUrl(["config-github", "org-not-set"]);
     }
+}
+
+async function goToLogicalFlight(query){
+    let selector = query[0];
+    query.shift();
+    await goToUrl(["flight", selector, query.join("-")])
 }
 
 async function setCalled(query){
@@ -53,7 +66,7 @@ async function goToUrl(query){
     if(dev){
         console.log("You would fly to:", "https://fly.apollorion.com/" + query.join("/"));
     } else {
-        chrome.tabs.update({url: "https://fly.apollorion.com/" + query.join("/")});
+        await chrome.tabs.update({url: "https://fly.apollorion.com/" + query.join("/")});
     }
 
 }

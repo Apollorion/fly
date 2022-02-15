@@ -1,52 +1,54 @@
 function main(){
-    const urlPath = window.location.pathname.split("/");
+    let urlPath = window.location.pathname.split("/");
+    urlPath.shift();
 
-    if(!urlPath.includes("logical")){
-        // Not a logical link
-        window.location.href = "https://github.com/Apollorion/fly";
-        return;
-    }
+    if(urlPath[0] === "flight") {
 
-    if(urlPath.length !== 4 && !urlPathIncludesDebug){
-        // Bad logical link
-        window.location.href = "https://github.com/Apollorion/fly/blob/main/help/logical-links.md#incorrect-length";
-        return;
-    }
+        // This file is templated and $logicalFlights is replaced in terraform
+        // with a legitimate json string. See cdn.tf.
+        const flights = JSON.parse('${logicalFlights}');
 
-    const linkIdentifier = urlPath[2];
-    const linkLogicValues = urlPath[3].split("-");
-
-    // This file is templated and $logicalLinks is replaced in terraform
-    // with a legitimate json string. See cdn.tf.
-    const logic = JSON.parse('${logicalLinks}');
-
-    if(linkIdentifier in logic){
-        let link = logic[linkIdentifier]["logic"];
-
-        let i = 1;
-        for(let item of linkLogicValues){
-            link = link.replace(`$$${i}`, item);
-            i++;
+        if(urlPath.length < 2) {
+            redirect(urlPath, "Incorrect Length", "https://github.com/Apollorion/fly/blob/main/help/logical-flights.md#incorrect-length")
         }
 
-        if(urlPathIncludesDebug(urlPath)){
-            console.log("Following Link", link);
+        const flightIdentifier = urlPath[1];
+        if (flightIdentifier in flights) {
+            let flight = flights[flightIdentifier];
+
+            if(urlPath.length < 3){
+                if("default" in flight) {
+                    redirect(urlPath, "default flight", flight["default"])
+                } else {
+                    redirect(urlPath, "Incorrect Length", "https://github.com/Apollorion/fly/blob/main/help/logical-flights.md#incorrect-length")
+                }
+            }
+
+            let flightLogicValues = urlPath[2].split("-");
+            let link = flight["logic"];
+
+            let i = 1;
+            for (let item of flightLogicValues) {
+                link = link.replace(`$$${i}`, item);
+                i++;
+            }
+
+            redirect(urlPath, `Following Link ${link}`, link)
+
         } else {
-            window.location.href = link;
+            redirect(urlPath, "Logic Not Found", "https://github.com/Apollorion/fly/blob/main/help/logical-flights.md#logic-not-found");
         }
-
     } else {
-        if(urlPathIncludesDebug(urlPath)){
-            console.log("Logic not found");
-        } else {
-            window.location.href = "https://github.com/Apollorion/fly/blob/main/help/logical-links.md#logic-not-found";
-        }
+        redirect(urlPath, "Not a logical flight", "https://github.com/Apollorion/fly")
     }
 
 }
 
-function urlPathIncludesDebug(urlPath){
-    return urlPath.length === 5 && urlPath[4] === "debug";
+function redirect(urlPath, message, link){
+    console.log(message);
+    if(urlPath[urlPath.length - 1] !== "debug"){
+        window.location.href = link;
+    }
 }
 
 main();

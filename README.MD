@@ -27,12 +27,45 @@ Fly will follow any links to `fly.apollorion.com/$query`.
 
 `fly tfc` taks you to terraform cloud.  
 `fly aws` takes you to the aws console.  
-`fly aws-us-east-1` takes you to the aws console in us-east-1.
+`fly aws us-east-1` takes you to the aws console in us-east-1.
 etc, etc, etc.
 
 Additionally, it will search your bookmarks for links. This is however, not the intended use case.  
 All fly.apollorion.com links are in `links.tf` and are supported by this extension.  
 
+## Logical Flights
+Logical flights are kind of "smart links". The logic for the flight is built into this application.
+Some logical flights (`gh` or github for example) may require some initial configuration.
+
+### gh
+The gh logical flight works 2 ways
+#### default org
+If you visit a github org often, you can set the org name so during the flight you only have to specify the repo name.
+For example, say you visit `https://github.com/Apollorion` org a lot.
+You can run `fly set gh-org Apollorion` and then whenever you want to fly to any repo within that org you only need to specify the repo name.
+So say you want to go to `https://github.com/Apollorion/manifests.io`, if you've set `Apollorion` as the default org you only need to `fly gh manifests.io`.
+#### specifying org
+If you specify an org during your flight, it will use that org instead of the default one.
+So flights like `fly gh Apollorion manifests.io` will take you to `https://github.com/Apollorion/manifests.io`.
+
+### aws
+The aws logical flight will take you to the default `https://console.aws.amazon.com/console/home` if you just `fly aws`.
+Or you can go to a specific region via `fly aws us-east-1`.
+
+# Devving this repo
+
+## Logical Flights
+Logical flights are always going to return a 404 from the CDN (rewritten to 200 for the end user).  
+A logical flights will look like `https://fly.apollorion.com/flight/gh/Apollorion-manifests.io`
+
+The example logic above will match `gh`, split `Apollorion-manifests.io` into `$1` = `Apollorion` and `$2` = `manifests.io`.  
+The logic defined in `links.tf` for `gh` is `https://github.com/$1/$2` which resolves to `https://github.com/Apollorion/manifests.io`.
+
+If your logical flight doesnt need to be very smart you can simply add the flight name (`gh` in the above example) to the`supportedLogicalFlights` const in `extension/background.js`.
+The extension will "just work" if you expect users to always type the full query in the extension.
+As an example, if the `gh` flight wasnt very smart, you could just do `fly gh Apollorion Manifests.io` and the correct url will auto generate.
+
+If you logical flight does need some custom logic, you can build that into `extension/background.js`. I'd suggest using `gh` as an example.
 
 
 # Alfred

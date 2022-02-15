@@ -27,11 +27,11 @@ module "cdn" {
 }
 
 locals {
-  links_to_map = merge(values({ for key, value in merge(local.links, local.help) : key => { for link in value : link => key } })...)
+  flights_to_map = merge(values({ for key, value in merge(local.flights, local.help) : key => { for link in value : link => key } })...)
 }
 
 resource "aws_s3_bucket_object" "websitefiles" {
-  for_each         = local.links_to_map
+  for_each         = local.flights_to_map
   bucket           = module.cdn.s3_bucket
   key              = each.key
   source           = ""
@@ -68,7 +68,7 @@ resource "aws_s3_bucket_object" "four-oh-four-js" {
   key    = "404.js"
 
   content = templatefile("templates/404.js", {
-    logicalLinks = jsonencode(local.logical_links)
+    logicalFlights = jsonencode(local.logical_flights)
   })
 
   acl          = "public-read"
@@ -78,5 +78,5 @@ resource "aws_s3_bucket_object" "four-oh-four-js" {
 }
 
 output "links" {
-  value = local.links_to_map
+  value = local.flights_to_map
 }
