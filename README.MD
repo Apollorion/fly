@@ -55,9 +55,9 @@ Or you can go to a specific region via `fly aws us-east-1`.
 
 ## Logical Flights
 Logical flights are always going to return a 404 from the CDN (rewritten to 200 for the end user).  
-A logical flights will look like `https://fly.apollorion.com/flight/gh/Apollorion-manifests.io`
+A logical flights will look like `https://fly.apollorion.com/flight/gh/Apollorion%23-%23manifests.io`
 
-The example logic above will match `gh`, split `Apollorion-manifests.io` into `$1` = `Apollorion` and `$2` = `manifests.io`.  
+The example logic above will match `gh`, split `Apollorion%23-%23manifests.io` into `$1` = `Apollorion` and `$2` = `manifests.io`.  
 The logic defined in `links.tf` for `gh` is `https://github.com/$1/$2` which resolves to `https://github.com/Apollorion/manifests.io`.
 
 If your logical flight doesnt need to be very smart you can simply add the flight name (`gh` in the above example) to the`supportedLogicalFlights` const in `extension/background.js`.
