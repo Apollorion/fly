@@ -24,7 +24,7 @@ function main(){
                 }
             }
 
-            let flightLogicValues = urlPath[2].split("-");
+            let flightLogicValues = urlPath[2].split("#-#");
             let link = flight["logic"];
 
             let i = 1;

@@ -34,7 +34,7 @@ async function goToGithub(query){
 
     try {
         let org = await getLocalStorage("gh-org");
-        return await goToUrl(["flight", "gh", `${org}-${query[1]}`]);
+        return await goToUrl(["flight", "gh", `${org}#-#${query[1]}`]);
     } catch {
         return await goToUrl(["config-github", "org-not-set"]);
     }
@@ -43,7 +43,7 @@ async function goToGithub(query){
 async function goToLogicalFlight(query){
     let selector = query[0];
     query.shift();
-    await goToUrl(["flight", selector, query.join("-")])
+    await goToUrl(["flight", selector, query.join("#-#")])
 }
 
 async function setCalled(query){
