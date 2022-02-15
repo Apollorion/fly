@@ -47,7 +47,7 @@ function main(){
 function redirect(urlPath, message, link){
     console.log(message);
     if(urlPath[urlPath.length - 1] !== "debug"){
-        window.location.href = link;
+        //window.location.href = link;
     }
 }
 
