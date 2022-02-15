@@ -53,6 +53,13 @@ async function setCalled(query){
 }
 
 async function goToUrl(query){
+
+    // We should never end our url's with slashes
+    // it breaks things.
+    if(query.join("/").endsWith("/")){
+        query.pop();
+    }
+
     let history;
     try {
         history = await getLocalStorage("history")
