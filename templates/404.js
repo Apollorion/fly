@@ -7,7 +7,7 @@ function main(){
         return;
     }
 
-    if(urlPath.length !== 4){
+    if(urlPath.length !== 4 && !urlPathIncludesDebug){
         // Bad logical link
         window.location.href = "https://github.com/Apollorion/fly/blob/main/help/logical-links.md#incorrect-length";
         return;
@@ -26,14 +26,27 @@ function main(){
         let i = 1;
         for(let item in linkLogicValues){
             link = link.replace(`$${i}`, item);
+            i++;
         }
 
-        window.location.href = link;
+        if(urlPathIncludesDebug(urlPath)){
+            console.log("Following Link", link);
+        } else {
+            window.location.href = link;
+        }
 
     } else {
-        window.location.href = "https://github.com/Apollorion/fly/blob/main/help/logical-links.md#logic-not-found";
+        if(urlPathIncludesDebug(urlPath)){
+            console.log("Logic not found");
+        } else {
+            window.location.href = "https://github.com/Apollorion/fly/blob/main/help/logical-links.md#logic-not-found";
+        }
     }
 
+}
+
+function urlPathIncludesDebug(urlPath){
+    return urlPath.length === 5 && urlPath[4] === "debug";
 }
 
 main();
