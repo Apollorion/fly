@@ -24,7 +24,7 @@ function main(){
         let link = logic[linkIdentifier]["logic"];
 
         let i = 1;
-        for(let item in linkLogicValues){
+        for(let item of linkLogicValues){
             link = link.replace(`$$${i}`, item);
             i++;
         }
