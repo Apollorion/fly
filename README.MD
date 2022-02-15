@@ -37,7 +37,7 @@ All flights are defined in `flights.tf`.
 ## Logical Flights
 Logical flights are, I guess you could call, "smart links".
 They arent hardcoded into this repository and use logic to determine where you want to go.  
-Some logical flights (`gh` or github for example) may require some initial configuration.
+Some logical flights (`gh` for example) may require some initial configuration (see below).
 
 ### Github - `gh`
 The `gh` logical flight works 2 ways.
