@@ -12,7 +12,7 @@ Im an engineer and it annoys me that I have to go through a sales portal to get 
 For instance, `datadog.com` takes me to `datadoghq.com`'s main landing page instead of directly to `app.datadoghq.com`.
 The same is for `terraform.io` (I want `app.terraform.io/app`) and aws (gimme more console) and so much more!
 
-Many products / sites are this way. I just want to directly go to what I want.  
+Many products / sites are this way. I just want to go straight to what I care about and not have to jump through a bunch of links.  
 Now, with fly, I can just use the fly extension to do `fly tfc` and it will take me to `app.terraform.io/app`!
 
 # Installation
