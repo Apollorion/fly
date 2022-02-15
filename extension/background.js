@@ -1,43 +1,85 @@
-//
-// This (suggest) is currently bugged due to an issue with chromes API:
-// https://bugs.chromium.org/p/chromium/issues/detail?id=1186804
-// Once resolved we can do this again.
-//
-// chrome.omnibox.onInputChanged.addListener((text, suggest) => {
-//     chrome.storage.local.get(["history"], function(items){
-//         if(items?.history) {
-//             const suggestions = JSON.parse(items.history).map((history) => {
-//                 if (history.toLowerCase().includes(text.toLowerCase())) {
-//                     return {
-//                         content: history,
-//                         description: history
-//                     };
-//                 }
-//             });
-//
-//             const filtered = suggestions.filter(function (x) {
-//                 return x !== undefined;
-//             });
-//
-//             suggest(filtered);
-//         }
-//     });
-// });
+const dev = false;
 
-chrome.omnibox.onInputEntered.addListener((text, OnInputEnteredDisposition) => {
+async function main() {
+    chrome.omnibox.onInputEntered.addListener((text, OnInputEnteredDisposition) => {
 
-    chrome.storage.local.get(["history"], function(items){
-        let history;
-        if(items?.history) {
-            history = JSON.parse(items.history);
-            history.push(text);
+        const query = text.split(" ");
+        if(query[0] === "set"){
+            setCalled(query);
         } else {
-            history = [text];
+            switch(query[0]){
+                case "gh":
+                    goToGithub(query);
+                    break;
+                default:
+                    goToUrl(query);
+                    break;
+            }
         }
 
-        chrome.storage.local.set({history: JSON.stringify(history)}, function () {
-            chrome.tabs.update({url: "https://fly.apollorion.com/" + text});
+    });
+}
+
+async function goToGithub(query){
+    if(query.length !== 2){
+        return goToUrl(["config-github", "repo-not-set"]);
+    }
+
+    try {
+        let org = await getLocalStorage("gh-org");
+        goToUrl(["logical", "gh", `${org}-${query[1]}`]);
+    } catch {
+        goToUrl(["config-github", "org-not-set"]);
+    }
+}
+
+async function setCalled(query){
+    if(query.length === 3){
+        await setLocalStorage(query[1], query[2]);
+    }
+}
+
+async function goToUrl(query){
+    let history;
+    try {
+        history = await getLocalStorage("history")
+        history.push(query.join("/"));
+    } catch {
+        history = [query.join("/")];
+    }
+
+    await setLocalStorage("history", history);
+
+    if(dev){
+        console.log("You would fly to:", "https://fly.apollorion.com/" + query.join("/"));
+    } else {
+        chrome.tabs.update({url: "https://fly.apollorion.com/" + query.join("/")});
+    }
+
+}
+
+async function setLocalStorage(key, value){
+    return new Promise((resolve, reject) => {
+        let obj = {};
+        obj[key] = JSON.stringify(value);
+        chrome.storage.local.set(obj, function () {
+            resolve();
         });
     });
+}
 
+async function getLocalStorage(key){
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.get([key], async function (items) {
+            if(key in items){
+                resolve(JSON.parse(items[key]));
+            } else {
+                reject();
+            }
+        });
+    });
+}
+
+main().then(()=>{
+    console.log("Finished");
 });
