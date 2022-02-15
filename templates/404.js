@@ -9,7 +9,7 @@ function main(){
         const flights = JSON.parse('${logicalFlights}');
 
         if(urlPath.length < 2) {
-            redirect(urlPath, "Incorrect Length", "https://github.com/Apollorion/fly/blob/main/help/logical-flights.md#incorrect-length")
+            redirect(urlPath, "Incorrect Length", "https://github.com/Apollorion/fly/blob/main/help/logical-flights.md#incorrect-length");
         }
 
         const flightIdentifier = urlPath[1];
@@ -18,9 +18,9 @@ function main(){
 
             if(urlPath.length < 3){
                 if("default" in flight) {
-                    redirect(urlPath, "default flight", flight["default"])
+                    redirect(urlPath, "default flight", flight["default"]);
                 } else {
-                    redirect(urlPath, "Incorrect Length", "https://github.com/Apollorion/fly/blob/main/help/logical-flights.md#incorrect-length")
+                    redirect(urlPath, "Incorrect Length", "https://github.com/Apollorion/fly/blob/main/help/logical-flights.md#incorrect-length");
                 }
             }
 
@@ -33,13 +33,13 @@ function main(){
                 i++;
             }
 
-            redirect(urlPath, `Following Link $${link}`, link)
+            redirect(urlPath, `Following Link $${link}`, link);
 
         } else {
             redirect(urlPath, "Logic Not Found", "https://github.com/Apollorion/fly/blob/main/help/logical-flights.md#logic-not-found");
         }
     } else {
-        redirect(urlPath, "Not a logical flight", "https://github.com/Apollorion/fly")
+        redirect(urlPath, "Not a logical flight", "https://github.com/Apollorion/fly");
     }
 
 }
