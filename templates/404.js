@@ -1,6 +1,6 @@
 function main(){
-    let urlPath = window.location.pathname.split("/");
-    urlPath.shift();
+    let urlPath = window.location.pathname.substr(1).split("/");
+    console.log(urlPath);
 
     if(urlPath[0] === "flight") {
 
@@ -47,6 +47,7 @@ function main(){
 function redirect(urlPath, message, link){
     console.log(message);
     if(urlPath[urlPath.length - 1] !== "debug"){
+        console.log("following link", link);
         //window.location.href = link;
     }
 }
