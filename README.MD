@@ -44,7 +44,8 @@ The `gh` logical flight works 2 ways.
 #### Default Org (config required)
 If you visit a specific github org often, you can set the org name so that during the flight you only have to specify the repo name.
 
-Say you visit the `Apollorion` github org a lot.  
+Say you visit the `Apollorion` github org a lot.
+
 You can run `fly set gh-org Apollorion` and now the extension will assume the `Apollorion` org if an org isnt directly specified.
 Flights like `fly gh manifests.io` will now take you to `https://github.com/Apollorion/manifests.io`.
 #### Specifying Org
