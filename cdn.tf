@@ -27,7 +27,7 @@ module "cdn" {
 }
 
 locals {
-  links_to_map = merge(values({ for key, value in local.links : key => { for link in value : link => key } })...)
+  links_to_map = merge(values({ for key, value in merge(local.links, local.help) : key => { for link in value : link => key } })...)
 }
 
 resource "aws_s3_bucket_object" "websitefiles" {
@@ -56,10 +56,24 @@ resource "aws_s3_bucket_object" "index" {
 resource "aws_s3_bucket_object" "four-oh-four" {
   bucket       = module.cdn.s3_bucket
   key          = "404.html"
-  content      = "<html><head><meta http-equiv=\"refresh\" content=\"0; URL=${local.github_url}\"/></head></html>"
+  content      = "<html><head></head><body><script src=\"https://fly.apollorion.com/404.js\"></script></body></html>"
   acl          = "public-read"
   content_type = "text/html"
-  etag         = md5("https://github.com/apollorion/fly")
+  etag         = md5("404.js")
+  tags         = {}
+}
+
+resource "aws_s3_bucket_object" "four-oh-four-js" {
+  bucket = module.cdn.s3_bucket
+  key    = "404.js"
+
+  content = templatefile("templates/404.js", {
+    logicalLinks = jsonencode(local.logical_links)
+  })
+
+  acl          = "public-read"
+  content_type = "application/javascript"
+  etag         = filemd5("templates/404.js")
   tags         = {}
 }
 
