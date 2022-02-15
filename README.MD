@@ -30,18 +30,17 @@ Fly will follow any links to `fly.apollorion.com/$query`.
 `fly aws us-east-1` takes you to the aws console in us-east-1.
 etc, etc, etc.
 
-Additionally, it will search your bookmarks for links. This is however, not the intended use case.  
-All fly.apollorion.com links are in `links.tf` and are supported by this extension.  
+All fly.apollorion.com links are in `flights.tf` and are supported by this extension.
 
 ## Logical Flights
-Logical flights are kind of "smart links". The logic for the flight is built into this application.
+Logical flights are kind of "smart links".
 Some logical flights (`gh` or github for example) may require some initial configuration.
 
 ### gh
 The gh logical flight works 2 ways
 #### default org
-If you visit a github org often, you can set the org name so during the flight you only have to specify the repo name.
-For example, say you visit `https://github.com/Apollorion` org a lot.
+If you visit a github org often, you can set the org name so that during the flight you only have to specify the repo name.
+Say you visit the `Apollorion` github org a lot.
 You can run `fly set gh-org Apollorion` and then whenever you want to fly to any repo within that org you only need to specify the repo name.
 So say you want to go to `https://github.com/Apollorion/manifests.io`, if you've set `Apollorion` as the default org you only need to `fly gh manifests.io`.
 #### specifying org
