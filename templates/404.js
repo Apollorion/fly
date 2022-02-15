@@ -25,7 +25,7 @@ function main(){
 
         let i = 1;
         for(let item in linkLogicValues){
-            link = link.replace(`$${i}`, item);
+            link = link.replace(`$$${i}`, item);
             i++;
         }
 
