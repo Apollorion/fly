@@ -1,6 +1,6 @@
 {
   "name": "Fly",
-  "description": "Fly is a software engineers best friend.",
+  "description": "Software engineer quicklinks.",
   "version": "0.2.0",
   "manifest_version": 3,
   "omnibox": {
