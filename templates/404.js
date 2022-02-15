@@ -33,7 +33,7 @@ function main(){
                 i++;
             }
 
-            redirect(urlPath, `Following Link ${link}`, link)
+            redirect(urlPath, `Following Link $${link}`, link)
 
         } else {
             redirect(urlPath, "Logic Not Found", "https://github.com/Apollorion/fly/blob/main/help/logical-flights.md#logic-not-found");
