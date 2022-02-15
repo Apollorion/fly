@@ -33,7 +33,7 @@ function main(){
                 i++;
             }
 
-            redirect(urlPath, `Following Link $${link}`, link);
+            redirect(urlPath, `Following Link`, link);
 
         } else {
             redirect(urlPath, "Logic Not Found", "https://github.com/Apollorion/fly/blob/main/help/logical-flights.md#logic-not-found");
@@ -48,7 +48,7 @@ function redirect(urlPath, message, link){
     console.log(message);
     if(urlPath[urlPath.length - 1] !== "debug"){
         console.log("following link", link);
-        //window.location.href = link;
+        window.location.href = link;
     }
 }
 
