@@ -4,7 +4,7 @@
   "description": "Software engineer quicklinks.",
   "main": "./extension/dist/background.js",
   "scripts": {
-    "build": "npx tsc -p .",
+    "build": "npx tsc -p ."
   },
   "author": "Apollorion",
   "license": "MIT",
