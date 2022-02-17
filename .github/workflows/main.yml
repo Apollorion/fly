@@ -86,6 +86,7 @@ jobs:
         run: | 
           cp LICENSE ./dist/
           envsubst < ./extension/manifest.json > ./dist/manifest.json
+          cp ./extension/img.png ./dist/img.png
           cd ./dist
           zip -r extension.zip ./
           mv extension.zip ../
