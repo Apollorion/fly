@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "es6",
+    "esModuleInterop": true,
+    "sourceMap": false,
+    "noEmitOnError": true,
+    "outDir": "./dist",
+    "typeRoots": [ "node_modules/@types" ],
+    "lib": [
+      "es2015",
+      "dom",
+      "dom.iterable"
+    ]
+  },
+}

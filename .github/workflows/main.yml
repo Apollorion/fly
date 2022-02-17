@@ -2,17 +2,21 @@ name: 'main'
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - *
   pull_request:
     types: [ labeled ]
+
+defaults:
+  run:
+    working-directory: ./extension
 
 jobs:
 
   push:
     name: 'push'
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: github.event_name == 'tag' or github.event.label.name == 'safe-to-stage'
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
@@ -31,13 +35,30 @@ jobs:
         with:
           terraform_version: 1.1.4
 
+      - uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: install
+
+      - uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: build
+
       # Checks that all Terraform configuration files adhere to a canonical format
       - name: Terraform Format
+        working-directory: terraform
         run: terraform fmt -check
 
       # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
         run: terraform init
+        working-directory: terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Terraform plan
+        run: terraform plan
+        working-directory: terraform
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -45,7 +66,8 @@ jobs:
         # On push to main, build or change infrastructure according to Terraform configuration files
         # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
+        if: startsWith(github.ref, 'refs/tags/')
+        working-directory: terraform
         run: terraform apply -auto-approve
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -53,8 +75,20 @@ jobs:
 
       # Create Cloudfront invalidation
       - run: aws cloudfront create-invalidation --distribution-id E1N3PITIUX8V3S --paths "/*"
-        if: github.ref == 'refs/heads/main'
+        if: startsWith(github.ref, 'refs/tags/')
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: "us-east-1"
+
+      - name: Build Zip
+        if: startsWith(github.ref, 'refs/tags/')
+        run: cp LICENSE ./extension/dist/ && zip -r extension.zip ./extension/dist/
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          files: |
+            extension.zip

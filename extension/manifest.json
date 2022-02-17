@@ -1,7 +1,7 @@
 {
   "name": "Fly",
   "description": "Software engineer quicklinks.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "manifest_version": 3,
   "omnibox": {
     "keyword": "fly"
@@ -15,6 +15,7 @@
     "storage"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   }
 }
