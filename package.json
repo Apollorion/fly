@@ -2,7 +2,7 @@
   "name": "fly",
   "version": "0.3.0",
   "description": "Software engineer quicklinks.",
-  "main": "background.js",
+  "main": "./extension/dist/background.js",
   "scripts": {
     "build": "npx tsc -p .",
   },
