@@ -20,3 +20,8 @@ export interface LogicalFlightDefinition {
 export interface StandardFlightDefinition {
     [key: string]: string[]
 }
+
+export interface RepoFlightsResponse {
+    logical: LogicalFlightDefinition,
+    standard: StandardFlightDefinition
+}

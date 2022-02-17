@@ -4,29 +4,27 @@ import {
 } from "./types.js";
 
 import {
-    logicalFlights,
-    standardFlights
-} from "./flights.js";
-
-import {
     getFlightFromQuery,
     setCalled,
     unsetCalled,
     getLocalStorage,
-    redirect
+    redirect,
+    checkRepoFlights, getNewFlightResponseSynchronous
 } from "./helpers.js";
+
+const repoFlightResponsePromise = checkRepoFlights();
 
 async function main() {
     // @ts-ignore
     chrome.omnibox.onInputEntered.addListener(async (text, OnInputEnteredDisposition) => {
         const query = text.split(" ");
         if(query[0] === "set"){
-            console.log("a");
             await setCalled(query);
         } else if (query[0] === "unset") {
             await unsetCalled(query);
         } else {
-            const flight = getFlightFromQuery(query);
+            const repoFlightResponse = await repoFlightResponsePromise;
+            const flight = await getFlightFromQuery(query, repoFlightResponse);
             if(flight.type == FlightType.LOGICAL){
                 switch(flight.identifier){
                     case "gh":
@@ -72,8 +70,12 @@ async function goToGithub(flight: Flight){
 }
 
 async function handleStandardFlight(flight: Flight){
-    for(let key in standardFlights){
-        for(let value of standardFlights[key]){
+    const repoFlightResponse = await repoFlightResponsePromise;
+    let newFlights = getNewFlightResponseSynchronous(repoFlightResponse);
+    const newStandardFlights = newFlights.standard;
+
+    for(let key in newStandardFlights){
+        for(let value of newStandardFlights[key]){
             if(value === flight.identifier){
                 return await redirect(`Following Link`, key);
             }
@@ -84,10 +86,13 @@ async function handleStandardFlight(flight: Flight){
 }
 
 async function handleFlight(flight: Flight){
+    const repoFlightResponse = await repoFlightResponsePromise;
+    let newFlights = getNewFlightResponseSynchronous(repoFlightResponse);
+    const newLogicalFlights = newFlights.logical;
 
     if(flight.type === FlightType.LOGICAL && flight.values !== undefined) {
-        if (flight.identifier in logicalFlights) {
-            let flightDetails = logicalFlights[flight.identifier];
+        if (flight.identifier in newLogicalFlights) {
+            let flightDetails = newLogicalFlights[flight.identifier];
 
             if(flight.values.length === 0){
                 if(flight.override !== undefined) {

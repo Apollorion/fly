@@ -9,7 +9,7 @@
     "rootDir": "./extension",
     "typeRoots": [ "node_modules/@types" ],
     "lib": [
-      "es2015",
+      "es2016",
       "dom",
       "dom.iterable"
     ]
