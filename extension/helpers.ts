@@ -1,19 +1,22 @@
-import {Flight, FlightType} from "./types.js";
-import {logicalFlights} from "./flights.js";
+import {Flight, FlightType, LogicalFlightDefinition, StandardFlightDefinition, RepoFlightsResponse} from "./types.js";
+import {logicalFlights, standardFlights} from "./flights.js";
 
-export function getFlightFromQuery(query: string[]): Flight {
+export async function getFlightFromQuery(query: string[], repoFlightResponse: RepoFlightsResponse | undefined): Promise<Flight> {
     // Remove null items from values
     query = query.filter(function (el) {
         return el != null;
     });
 
-    if(query[0] in logicalFlights){
+    const newFlights = getNewFlightResponseSynchronous(repoFlightResponse);
+    const newLogicalFlights = newFlights.logical;
+
+    if(query[0] in newLogicalFlights){
         const identifier = query[0];
         query.shift();
 
         let d = undefined;
-        if(logicalFlights[identifier].override !== undefined){
-            d = logicalFlights[identifier].override;
+        if(newLogicalFlights[identifier].override !== undefined){
+            d = newLogicalFlights[identifier].override;
         }
 
         return {
@@ -30,10 +33,71 @@ export function getFlightFromQuery(query: string[]): Flight {
     }
 }
 
+export function getNewFlightResponseSynchronous(repoFlightResponse: RepoFlightsResponse | undefined) : RepoFlightsResponse{
+    let newLogicalFlights: LogicalFlightDefinition;
+    if(repoFlightResponse !== undefined) {
+        newLogicalFlights = {
+            ...logicalFlights,
+            ...repoFlightResponse.logical
+        }
+    } else {
+        newLogicalFlights = {
+            ...logicalFlights
+        }
+    }
+
+    let newStandardFlights: StandardFlightDefinition;
+    if(repoFlightResponse !== undefined) {
+        newStandardFlights = {
+            ...standardFlights,
+            ...repoFlightResponse.standard
+        }
+    } else {
+        newStandardFlights = {
+            ...standardFlights
+        }
+    }
+
+    return {
+        logical: newLogicalFlights,
+        standard: newStandardFlights
+    }
+
+}
+
+export async function checkRepoFlights(): Promise<RepoFlightsResponse | undefined>{
+    let response;
+    try {
+        const repoUrl = await getLocalStorage("repo");
+        const jsonString = await requestJson(repoUrl);
+        response = JSON.parse(jsonString);
+    } catch (e) {
+        console.log("No custom repo set", e);
+        return undefined;
+    }
+
+    if(response.version === "1" && Object.keys(response).includes("logical") && Object.keys(response).includes("standard")){
+        return {
+            standard: response.standard,
+            logical: response.logical
+        }
+    }
+
+    return undefined;
+
+}
+
+async function requestJson(url: string): Promise<string> {
+    return new Promise(function(resolve,reject){
+        fetch(url)
+            .then(response => resolve(response.text()))
+            .catch(err => reject(err))
+    });
+}
+
+
 export async function setCalled(query: string[]){
-    console.log("b")
     if(query.length === 3){
-        console.log("c")
         await setLocalStorage(query[1], query[2]);
     }
 }
@@ -68,14 +132,12 @@ export async function redirect(message: string, link: string){
 }
 
 async function setLocalStorage(key: string, value: string){
-    console.log("d");
     return new Promise((resolve, reject) => {
         console.log("set", key, value);
         let obj: any = {};
         obj[key] = value;
         // @ts-ignore
         chrome.storage.local.set(obj, function () {
-            console.log("f");
             resolve(undefined);
         });
     });

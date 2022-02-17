@@ -19,7 +19,7 @@ Now, with fly, I can just use the fly extension to do `fly tfc` and it will take
 # Installation
 
 Coming soon! Submitted to chrome app store!  
-If you want to install now, download a release, unzip it, and `load unpacked` its contents in chrome://extensions.
+If you want to install now, download a [release](https://github.com/Apollorion/fly/releases), unzip it, and `load unpacked` its contents in chrome://extensions.
 
 
 # Usage
@@ -54,6 +54,19 @@ Flights like `fly gh Apollorion manifests.io` will take you to `https://github.c
 ### AWS - `aws`
 The `aws` logical flight will take you to the default console home (`https://console.aws.amazon.com/console/home`) if your flight is just `fly aws`.  
 Alternatively, you can go to a specific region via `fly aws us-east-1`.
+
+# Custom flight repos
+You can host a custom flight repo and point the extension to it. This will allow you to define standard and logical flights without contributing to this project.
+
+The custom flight repo has 4 requirements.
+1. It is a valid json document
+2. The `Access-Control-Allow-Origin: *` header is present (this is a chrome requirement)
+3. It has a version specified, at the time of writing only supported version is `1`.
+4. There are `standard` and `logical` keys on the object.
+
+An example repo doc is here: `https://apollorion.com/flight_repo.json`
+
+To use the custom flight repo, just run `fly set repo $url`. You can unset this repo at anytime via `fly unset repo`.
 
 # Devving this repo
 I'd like to make devving a little less painful somehow, but right now what you need to do is:
