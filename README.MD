@@ -19,7 +19,7 @@ Now, with fly, I can just use the fly extension to do `fly tfc` and it will take
 # Installation
 
 Coming soon! Submitted to chrome app store!  
-If you want to install now, clone this repo and `load unpacked` the extension directory in chrome.
+If you want to install now, download a release, unzip it, and `load unpacked` its contents in chrome://extensions.
 
 
 # Usage
