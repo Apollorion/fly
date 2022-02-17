@@ -3,7 +3,7 @@ name: 'main'
 on:
   push:
     tags:
-      - *
+      - v*
   pull_request:
     types: [ labeled ]
 
