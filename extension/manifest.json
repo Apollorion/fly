@@ -1,7 +1,7 @@
 {
   "name": "Fly",
   "description": "Software engineer quicklinks.",
-  "version": "0.3.0",
+  "version": "$GITHUB_REF_NAME",
   "manifest_version": 3,
   "omnibox": {
     "keyword": "fly"
