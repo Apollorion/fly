@@ -6,6 +6,7 @@
     "sourceMap": false,
     "noEmitOnError": true,
     "outDir": "./dist",
+    "rootDir": "./extension",
     "typeRoots": [ "node_modules/@types" ],
     "lib": [
       "es2015",
