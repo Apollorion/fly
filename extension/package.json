@@ -1,0 +1,16 @@
+{
+  "name": "fly",
+  "version": "0.3.0",
+  "description": "Software engineer quicklinks.",
+  "main": "background.js",
+  "scripts": {
+    "build": "npx tsc -p .",
+  },
+  "author": "Apollorion",
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^2.0.15",
+    "ts-node": "^10.5.0",
+    "typescript": "^4.5.5"
+  }
+}

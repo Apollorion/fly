@@ -25,14 +25,12 @@ If you want to install now, clone this repo and `load unpacked` the extension di
 # Usage
 After installing the extension, in the omnibox via google chrome: `fly {query}`
 
-Fly will follow any links to `fly.apollorion.com/$query`.
-
 `fly tfc` taks you to terraform cloud.  
 `fly aws` takes you to the aws console.  
 `fly aws us-east-1` takes you to the aws console in us-east-1.
 etc, etc, etc.
 
-All flights are defined in `flights.tf`.
+All flights are defined in `background.ts`.
 
 ## Logical Flights
 Logical flights are, I guess you could call, "smart links".
@@ -58,19 +56,28 @@ The `aws` logical flight will take you to the default console home (`https://con
 Alternatively, you can go to a specific region via `fly aws us-east-1`.
 
 # Devving this repo
+I'd like to make devving a little less painful somehow, but right now what you need to do is:
+1. cd extension
+2. yarn install
+3. yarn build
+4. test things
+5. repeat steps 3, 4 infinitely
+
+I know things like nodemon exist, but it doesnt play well with chrome extensions and I havent figured out why quite yet.
+You need to `load unpacked` the extension in the `extension/dist` dir after building at least once.
+
 
 ## Logical Flights
-Logical flights are always going to return a 404 from the CDN (rewritten to 200 for the end user).  
-A logical flights will look like `https://fly.apollorion.com/flight/gh/Apollorion%23-%23manifests.io`
+Say a users query is `fly gh Apollorion manifests.io`
 
-The example logic above will match `gh`, split `Apollorion%23-%23manifests.io` into `$1` = `Apollorion` and `$2` = `manifests.io`.  
-The logic defined in `flights.tf` for `gh` is `https://github.com/$1/$2` which resolves to `https://github.com/Apollorion/manifests.io`.
+The example logic above will match `gh`, split `Apollorion manifests.io` into `$1` = `Apollorion` and `$2` = `manifests.io`.  
+The logic defined in `extension/flights.ts` for `gh` is `https://github.com/$1/$2` which resolves to `https://github.com/Apollorion/manifests.io`.
 
-If your logical flight doesnt need to be very smart you can simply add the flight name (`gh` in the above example) to the`supportedLogicalFlights` const in `extension/background.js`.  
+If your logical flight doesnt need to be very smart you can simply add the flight name (`gh` in the above example) to the`logicalFlights` const in `extension/background.ts`.  
 The extension will "just work" if you expect users to always type the full query in the extension.  
 As an example, the `aws` flight automatically builds the correct query without any special logic because it expects the user to type the full query every time.
 
-If you logical flight does need some custom logic, you can build that into `extension/background.js`. I'd suggest using `gh` as an example.
+If you logical flight does need some custom logic, you can build that into `extension/background.ts`. I'd suggest using `gh` as an example.
 
 
 # Alfred
