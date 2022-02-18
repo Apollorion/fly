@@ -18,8 +18,14 @@ Now, with fly, I can just use the fly extension to do `fly tfc` and it will take
 
 # Installation
 
-Coming soon! Submitted to chrome app store!  
-If you want to install now, download a [release](https://github.com/Apollorion/fly/releases), unzip it, and `load unpacked` its contents in chrome://extensions.
+Install on [Chrome Web Store](https://chrome.google.com/webstore/detail/fly/nafhoogklliiodhpleeblaafahecnpcp).
+
+If you want to install the latest unreleased version:
+1. download a [release](https://github.com/Apollorion/fly/releases)
+2. unzip it
+3. navigate to chrome://extensions
+4. toggle `Developer mode`
+5. `load unpacked` the unzipped contents of the release
 
 
 # Usage
@@ -30,7 +36,7 @@ After installing the extension, in the omnibox via google chrome: `fly {query}`
 `fly aws us-east-1` takes you to the aws console in us-east-1.
 etc, etc, etc.
 
-All flights are defined in `background.ts`.
+All flights are defined in `extension/flights.ts`.
 
 ## Logical Flights
 Logical flights are, I guess you could call, "smart links".
@@ -58,13 +64,25 @@ Alternatively, you can go to a specific region via `fly aws us-east-1`.
 # Custom flight repos
 You can host a custom flight repo and point the extension to it. This will allow you to define standard and logical flights without contributing to this project.
 
-The custom flight repo has 4 requirements.
-1. It is a valid json document
-2. The `Access-Control-Allow-Origin: *` header is present (this is a chrome requirement)
-3. It has a version specified, at the time of writing only supported version is `1`.
-4. There are `standard` and `logical` keys on the object.
-
 An example repo doc is here: `https://apollorion.com/flight_repo.json`
+
+The custom flight repo has 2 requirements.
+1. The `Access-Control-Allow-Origin: *` header is present (this is a chrome requirement)
+2. It has the below structure:
+```typescript
+interface CustomFlightRepo {
+    version: string, // Currently supported version is `1`
+    logical: {
+        [key: string]: {
+            logic: string,
+            override?: string
+        }
+    },
+    standard: {
+        [key: string]: string[]
+    }
+}
+```
 
 To use the custom flight repo, just run `fly set repo $url`. You can unset this repo at anytime via `fly unset repo`.
 
