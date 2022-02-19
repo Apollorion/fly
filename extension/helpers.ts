@@ -122,7 +122,7 @@ export async function getLocalStorage(key: string): Promise<string>{
 }
 
 export async function redirect(message: string, link: string){
-    const dev = false;
+    const dev = true;
     console.log(message, link);
     if(!dev){
         console.log("following link", link);
