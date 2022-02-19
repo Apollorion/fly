@@ -10,7 +10,7 @@ on:
 jobs:
 
   push:
-    name: 'push'
+    name: 'Test and Deploy'
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || github.event.label.name == 'safe-to-stage'
 
@@ -38,6 +38,10 @@ jobs:
       - uses: borales/actions-yarn@v2.3.0
         with:
           cmd: build
+
+      - uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: test
 
       # Checks that all Terraform configuration files adhere to a canonical format
       - name: Terraform Format

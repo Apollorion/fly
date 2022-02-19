@@ -99,11 +99,11 @@ Say a users query is `fly gh Apollorion manifests.io`
 The example logic above will match `gh`, split `Apollorion manifests.io` into `$1` = `Apollorion` and `$2` = `manifests.io`.  
 The logic defined in `extension/flights.ts` for `gh` is `https://github.com/$1/$2` which resolves to `https://github.com/Apollorion/manifests.io`.
 
-If your logical flight doesnt need to be very smart you can simply add the flight name (`gh` in the above example) to the`logicalFlights` const in `extension/background.ts`.  
+If your logical flight doesnt need to be very smart you can simply add the flight name (`gh` in the above example) to the`logicalFlights` const in `extension/main.ts`.  
 The extension will "just work" if you expect users to always type the full query in the extension.  
 As an example, the `aws` flight automatically builds the correct query without any special logic because it expects the user to type the full query every time.
 
-If you logical flight does need some custom logic, you can build that into `extension/background.ts`. I'd suggest using `gh` as an example.
+If you logical flight does need some custom logic, you can build that into `extension/main.ts`. I'd suggest using `gh` as an example.
 
 
 # Alfred
