@@ -3,10 +3,10 @@ import {LogicalFlightDefinition, StandardFlightDefinition} from "./types.js";
 export const logicalFlights: LogicalFlightDefinition = {
     "aws": {
         "override": "https://console.aws.amazon.com/console/home",
-        "logic": "https://console.aws.amazon.com/console/home?region=$1"
+        "logic": "https://console.aws.amazon.com/console/home?region=${region}",
     },
     "gh": {
-        "logic": "https://github.com/$1/$2"
+        "logic": "https://github.com/${gh-org}/${repo}",
     }
 };
 

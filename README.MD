@@ -39,27 +39,26 @@ etc, etc, etc.
 All flights are defined in `extension/flights.ts`.
 
 ## Logical Flights
-Logical flights are, I guess you could call, "smart links".
+Logical flights are, I guess you could call, "smart links".  
 They arent hardcoded into this repository and use logic to determine where you want to go.  
-Some logical flights (`gh` for example) may require some initial configuration (see below).
+You can set defaults for anything within a logical flight.
 
-### Github - `gh`
-The `gh` logical flight works 2 ways.
-#### Default Org (config required)
-If you visit a specific github org often, you can set the org name so that during the flight you only have to specify the repo name.
+Look at the `gh` logical flight as an example. Its logic is as follows: `https://github.com/${gh-org}/${repo}`.
 
-Say you visit the `Apollorion` github org a lot.
+If no defaults are specified, the extension will assume you will pass in at least 2 parameters to the flight.  
+`fly hg Apollorion manifests.io` is calculated positionally in this case. `Apollorion` will replace `${gh-org}` and `manifests.io` will replace `${repo}`.  
+Which will fly to `https://github.com/Apollorion/manifests.io`.
 
-You can run `fly set gh-org Apollorion` and now the extension will assume the `Apollorion` org if an org isnt directly specified.
-Flights like `fly gh manifests.io` will now take you to `https://github.com/Apollorion/manifests.io`.
-#### Specifying Org
-If you specify an org during your flight, it will use that org instead of the default one.
+You can, optionally, set a default for any parameter in a logical flight.  
+`fly set gh-org Apollorion` will set the default for `gh-org` to `Apollorion`.  
+Now, when you fly the `gh` flight, it will first replace `${gh-org}` with `Apollorion` and then any remaining parameters will be replaced positionally.  
+So you could do `fly gh manifests.io` and it will fly to `https://github.com/Apollorion/manifests.io`.
 
-Flights like `fly gh Apollorion manifests.io` will take you to `https://github.com/Apollorion/manifests.io`.
-
-### AWS - `aws`
-The `aws` logical flight will take you to the default console home (`https://console.aws.amazon.com/console/home`) if your flight is just `fly aws`.  
-Alternatively, you can go to a specific region via `fly aws us-east-1`.
+Note: ANY unset parameters will be replaced positionally, in order.  
+If you have a logical flight that is defined as `https://my.com/{$thing1}/{$thing2}/{$thing3}`, and you only set the default for `thing1`.
+The extension will expect you to pass in 2 parameters at flight time, otherwise a default flight will be used or an error will be thrown.
+`fly my.com test1 test2` will fly to `https://my.com/{thing1 default}/test1/test2/`.  
+`fly my.com test` will either go to a defined default flight or throw an error.
 
 # Custom flight repos
 You can host a custom flight repo and point the extension to it. This will allow you to define standard and logical flights without contributing to this project.
@@ -87,15 +86,11 @@ interface CustomFlightRepo {
 To use the custom flight repo, just run `fly set repo $url`. You can unset this repo at anytime via `fly unset repo`.
 
 # Devving this repo
-I'd like to make devving a little less painful somehow, but right now what you need to do is:
-1. cd extension
-2. yarn install
-3. yarn build
-4. test things
-5. repeat steps 3, 4 infinitely
 
-I know things like nodemon exist, but it doesnt play well with chrome extensions and I havent figured out why quite yet.
+Startup the dev server via `./dev.sh`.
 You need to `load unpacked` the extension in the `extension/dist` dir after building at least once.
+
+I havent found a work around yet, but whenever you make a change you need to refresh the extension in `chrome://extensions`.
 
 
 ## Logical Flights
