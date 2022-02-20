@@ -6,6 +6,7 @@ function rebuild(){
   export FLY_RELEASE_VERSION="0.0.1"
   envsubst < ./extension/manifest.json > ./dist/manifest.json
   cp ./extension/img.png ./dist/img.png
+  yarn test || true
   echo "Happy Coding!"
 }
 export -f rebuild
