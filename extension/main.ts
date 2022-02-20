@@ -7,12 +7,13 @@ import {
     getFlightFromQuery,
     setCalled,
     unsetCalled,
-    getLocalStorage,
     redirect,
-    checkRepoFlights, getNewFlightResponseSynchronous
+    checkRepoFlights,
+    getNewFlightResponseSynchronous,
+    repoManagement
 } from "./helpers.js";
 
-const repoFlightResponsePromise = checkRepoFlights();
+import {getLocalStorage } from "./localstorage.js";
 
 export async function main() {
     // @ts-ignore
@@ -22,8 +23,11 @@ export async function main() {
             await setCalled(query);
         } else if (query[0] === "unset") {
             await unsetCalled(query);
+        } else if (query[0] === "repo") {
+            let resp = await repoManagement(query);
+            console.log(resp);
         } else {
-            const repoFlightResponse = await repoFlightResponsePromise;
+            const repoFlightResponse = await checkRepoFlights();
             const flight = await getFlightFromQuery(query, repoFlightResponse);
             await handleFlight(flight);
         }
@@ -31,7 +35,7 @@ export async function main() {
 }
 
 export async function handleStandardFlight(flight: Flight){
-    const repoFlightResponse = await repoFlightResponsePromise;
+    const repoFlightResponse = await checkRepoFlights();
     let newFlights = getNewFlightResponseSynchronous(repoFlightResponse);
     const newStandardFlights = newFlights.standard;
 
@@ -47,7 +51,7 @@ export async function handleStandardFlight(flight: Flight){
 }
 
 export async function handleFlight(flight: Flight){
-    const repoFlightResponse = await repoFlightResponsePromise;
+    const repoFlightResponse = await checkRepoFlights();
     let newFlights = getNewFlightResponseSynchronous(repoFlightResponse);
     const newLogicalFlights = newFlights.logical;
 
