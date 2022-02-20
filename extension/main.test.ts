@@ -1,6 +1,7 @@
 import { handleFlight } from './main';
 import { Flight, FlightType } from './types';
-import { redirect, getLocalStorage } from './helpers';
+import { redirect } from './helpers';
+import { getLocalStorage } from "./localstorage.js";
 
 beforeEach(() => {
     jest.clearAllMocks();

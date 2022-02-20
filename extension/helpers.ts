@@ -1,5 +1,6 @@
 import {Flight, FlightType, LogicalFlightDefinition, StandardFlightDefinition, RepoFlightsResponse} from "./types.js";
 import {logicalFlights, standardFlights} from "./flights.js";
+import {setLocalStorage, getLocalStorage, unsetLocalStorage} from "./localstorage.js";
 
 export async function getFlightFromQuery(query: string[], repoFlightResponse: RepoFlightsResponse | undefined): Promise<Flight> {
     // Remove null items from values
@@ -66,25 +67,13 @@ export function getNewFlightResponseSynchronous(repoFlightResponse: RepoFlightsR
 }
 
 export async function checkRepoFlights(): Promise<RepoFlightsResponse | undefined>{
-    let response;
     try {
-        const repoUrl = await getLocalStorage("repo");
-        const jsonString = await requestJson(repoUrl);
-        response = JSON.parse(jsonString);
+        const jsonString = await getLocalStorage("updated-repos");
+        return JSON.parse(jsonString);
     } catch (e) {
         console.log("No custom repo set", e);
         return undefined;
     }
-
-    if(response.version === "1" && Object.keys(response).includes("logical") && Object.keys(response).includes("standard")){
-        return {
-            standard: response.standard,
-            logical: response.logical
-        }
-    }
-
-    return undefined;
-
 }
 
 async function requestJson(url: string): Promise<string> {
@@ -93,6 +82,73 @@ async function requestJson(url: string): Promise<string> {
             .then(response => resolve(response.text()))
             .catch(err => reject(err))
     });
+}
+
+export async function repoManagement(query: string[]): Promise<string> {
+    query.shift();
+    const action = query[0];
+    query.shift();
+
+    if(!["set", "unset", "update"].includes(action)){
+        return `Attempted to run ${action}, but that is not a valid action.`;
+    }
+
+    if((action === "set" && query.length !== 2) || (action === "unset" && query.length !== 1)){
+        return `${action} called with missing parameter`;
+    }
+
+    let repos;
+    let repoResult;
+    switch(action){
+        case "set":
+            try {
+                repoResult = await getLocalStorage("repos");
+            } catch {
+                repoResult = "{}";
+            }
+            repos = JSON.parse(repoResult);
+
+            repos[query[0]] = query[1];
+            await setLocalStorage("repos", JSON.stringify(repos));
+            return `set ${query[0]} ${query[1]}`;
+        case "unset":
+            try {
+                repoResult = await getLocalStorage("repos");
+            } catch {
+                repoResult = "{}";
+            }
+            repos = JSON.parse(repoResult);
+
+            if(Object.keys(repos).includes(query[0])){
+                delete repos[query[0]];
+            }
+            await setLocalStorage("repos", JSON.stringify(repos));
+            return `unset ${query[0]}`;
+        case "update":
+            try {
+                repoResult = await getLocalStorage("repos");
+            } catch {
+                repoResult = "{}";
+            }
+            repos = JSON.parse(repoResult);
+
+            let newRepoContent = {standard: {}, logical: {}};
+            for(let name in repos){
+                try {
+                    let json = JSON.parse(await requestJson(repos[name]));
+                    if(json.version === "1" && Object.keys(json).includes("logical") && Object.keys(json).includes("standard")){
+                        newRepoContent.standard = {...newRepoContent.standard, ...json.standard};
+                        newRepoContent.logical = {...newRepoContent.logical, ...json.logical};
+                    }
+                } catch {
+                    console.log(`Failed to fetch repo ${name}`);
+                }
+            }
+            await setLocalStorage("updated-repos", JSON.stringify(newRepoContent));
+            return "repos updated";
+        default:
+            throw new Error("Incorrect repo action");
+    }
 }
 
 
@@ -107,20 +163,6 @@ export async function unsetCalled(query: string[]){
     }
 }
 
-export async function getLocalStorage(key: string): Promise<string>{
-    return new Promise((resolve, reject) => {
-        console.log("get", key);
-        // @ts-ignore
-        chrome.storage.local.get([key], async function (items: { [x: string]: string; }) {
-            if(key in items){
-                resolve(items[key]);
-            } else {
-                reject();
-            }
-        });
-    });
-}
-
 export async function redirect(message: string, link: string){
     const dev = false;
     console.log(message, link);
@@ -129,26 +171,4 @@ export async function redirect(message: string, link: string){
         // @ts-ignore
         await chrome.tabs.update({url: link});
     }
-}
-
-async function setLocalStorage(key: string, value: string){
-    return new Promise((resolve, reject) => {
-        console.log("set", key, value);
-        let obj: any = {};
-        obj[key] = value;
-        // @ts-ignore
-        chrome.storage.local.set(obj, function () {
-            resolve(undefined);
-        });
-    });
-}
-
-async function unsetLocalStorage(key: string){
-    return new Promise((resolve, reject) => {
-        console.log("unset", key);
-        // @ts-ignore
-        chrome.storage.local.remove(key, function () {
-            resolve(undefined);
-        });
-    });
 }

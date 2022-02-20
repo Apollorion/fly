@@ -63,7 +63,7 @@ The extension will expect you to pass in 2 parameters at flight time, otherwise 
 # Custom flight repos
 You can host a custom flight repo and point the extension to it. This will allow you to define standard and logical flights without contributing to this project.
 
-An example repo doc is here: `https://apollorion.com/flight_repo.json`
+An example repo doc is here: `https://apollorion.com/flight_repo_named.json`
 
 The custom flight repo has 2 requirements.
 1. The `Access-Control-Allow-Origin: *` header is present (this is a chrome requirement)
@@ -83,7 +83,12 @@ interface CustomFlightRepo {
 }
 ```
 
-To use the custom flight repo, just run `fly set repo $url`. You can unset this repo at anytime via `fly unset repo`.
+To use the custom flight repo, just run `fly repo set $name $url` then `fly repo update`. You can unset this repo at anytime via `fly repo unset $name`.  
+`fly repo update` will fetch the contents of the repository.
+
+ex:
+1. `fly repo set apollorion https://apollorion.com/flight_repo_named.json`
+2. `fly repo update`
 
 # Devving this repo
 
