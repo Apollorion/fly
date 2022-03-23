@@ -7,11 +7,14 @@ export const logicalFlights: LogicalFlightDefinition = {
     },
     "gh": {
         "logic": "https://github.com/${gh-org}/${repo}",
+    },
+    "tfc": {
+        "override": "https://app.terraform.io/app/",
+        "logic": "https://app.terraform.io/app/${tfc-org}/workspaces?search=${tfc-search}"
     }
 };
 
 export const standardFlights: StandardFlightDefinition = {
-    "https://app.terraform.io/app/" : ["terraform", "tfc"],
     "https://app.datadoghq.com/" : ["datadog", "dd"],
 
     "https://github.com/Apollorion/fly/blob/main/help/config-github.md#org-not-set" : ["config-github/org-not-set"],
