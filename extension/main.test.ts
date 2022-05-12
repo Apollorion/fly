@@ -1,6 +1,6 @@
 import { handleFlight } from './main';
 import { Flight, FlightType } from './types';
-import { redirect } from './helpers';
+import {getFlightPlans, redirect} from './helpers';
 import { getLocalStorage } from "./localstorage.js";
 
 beforeEach(() => {
@@ -21,6 +21,8 @@ function mockGetLocalStorageWithResult() {
                 resolve("test-ls");
             } else if(key === "region") {
                 resolve("region-ls");
+            } else if(key === "ghcs-org"){
+                resolve("test-ghcs-ls");
             } else {
                 reject("error");
             }
@@ -37,7 +39,7 @@ function mockGetLocalStorageWithoutResult() {
     });
 }
 
-test('gh flight has 2 parameters with gh-org set', async () => {
+test('gh flight has 3 parameters with gh-org set', async () => {
     mockRedirect();
     mockGetLocalStorageWithResult();
 
@@ -46,10 +48,11 @@ test('gh flight has 2 parameters with gh-org set', async () => {
         identifier: "gh",
         values: ["test-1", "test-2", "test-3"]
     };
-    const response = await handleFlight(flight);
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
 
     // @ts-ignore
-    expect(response["link"]).toBe("https://github.com/test-ls/test-1");
+    expect(response["link"]).toBe("https://github.com/Apollorion/fly/blob/main/help/incorrect-length.md");
 });
 
 
@@ -62,7 +65,8 @@ test('gh flight has 2 parameters', async () => {
         identifier: "gh",
         values: ["test", "test"]
     };
-    const response = await handleFlight(flight);
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
 
     // @ts-ignore
     expect(response["link"]).toBe("https://github.com/test/test");
@@ -77,7 +81,8 @@ test('gh flight has 2 parameters with gh-org set', async () => {
         identifier: "gh",
         values: ["test-1", "test-2"]
     };
-    const response = await handleFlight(flight);
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
 
     // @ts-ignore
     expect(response["link"]).toBe("https://github.com/test-1/test-2");
@@ -93,7 +98,8 @@ test('gh flight has 1 parameters', async () => {
         identifier: "gh",
         values: ["test"]
     };
-    const response = await handleFlight(flight);
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
 
     // @ts-ignore
     expect(response["message"]).toBe("Incorrect Length");
@@ -108,7 +114,8 @@ test('gh flight has 1 parameters with gh-org set', async () => {
         identifier: "gh",
         values: ["test"]
     };
-    const response = await handleFlight(flight);
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
 
     // @ts-ignore
     expect(response["link"]).toBe("https://github.com/test-ls/test");
@@ -123,7 +130,8 @@ test('gh flight has 0 parameters', async () => {
         identifier: "gh",
         values: []
     };
-    const response = await handleFlight(flight);
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
 
     // @ts-ignore
     expect(response["message"]).toBe("Incorrect Length");
@@ -138,10 +146,107 @@ test('gh flight has 0 parameters with gh-org set', async () => {
         identifier: "gh",
         values: []
     };
-    const response = await handleFlight(flight);
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
 
     // @ts-ignore
     expect(response["message"]).toBe("Incorrect Length");
+});
+
+test('ghcs flight has 0 parameters with ghcs-org set', async () => {
+    mockRedirect();
+    mockGetLocalStorageWithResult();
+
+    const flight: Flight = {
+        type: FlightType.LOGICAL,
+        identifier: "ghcs",
+        values: []
+    };
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
+
+    // @ts-ignore
+    expect(response["message"]).toBe("Incorrect Length");
+});
+
+test('ghcs flight has 1 parameters with ghcs-org set and url encoded param', async () => {
+    mockRedirect();
+    mockGetLocalStorageWithResult();
+
+    const flight: Flight = {
+        type: FlightType.LOGICAL,
+        identifier: "ghcs",
+        values: ["test-search:test"]
+    };
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
+
+    // @ts-ignore
+    expect(response["link"]).toBe("https://cs.github.com/?scopeName=All+repos&scope=&q=org%3Atest-ghcs-ls+test-search%3Atest");
+});
+
+test('ghcs flight has 2 parameters', async () => {
+    mockRedirect();
+    mockGetLocalStorageWithoutResult();
+
+    const flight: Flight = {
+        type: FlightType.LOGICAL,
+        identifier: "ghcs",
+        values: ["test", "test"]
+    };
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
+
+    // @ts-ignore
+    expect(response["link"]).toBe("https://cs.github.com/?scopeName=All+repos&scope=&q=org%3Atest+test");
+});
+
+test('ghcs flight has 1 parameter, no local storage', async () => {
+    mockRedirect();
+    mockGetLocalStorageWithoutResult();
+
+    const flight: Flight = {
+        type: FlightType.LOGICAL,
+        identifier: "ghcs",
+        values: ["test"]
+    };
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
+
+    // @ts-ignore
+    expect(response["link"]).toBe("https://cs.github.com/?scopeName=All+repos&scope=&q=test");
+});
+
+test('ghcs flight has 1 parameter, no local storage, url encoded', async () => {
+    mockRedirect();
+    mockGetLocalStorageWithoutResult();
+
+    const flight: Flight = {
+        type: FlightType.LOGICAL,
+        identifier: "ghcs",
+        values: ["test:test"]
+    };
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
+
+    // @ts-ignore
+    expect(response["link"]).toBe("https://cs.github.com/?scopeName=All+repos&scope=&q=test%3Atest");
+});
+
+test('ghcs flight has 5 parameters, no local storage, url encoded', async () => {
+    mockRedirect();
+    mockGetLocalStorageWithoutResult();
+
+    const flight: Flight = {
+        type: FlightType.LOGICAL,
+        identifier: "ghcs",
+        values: ["test1", "test2", "test3", "test4", "test5"]
+    };
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
+
+    // @ts-ignore
+    expect(response["link"]).toBe("https://cs.github.com/?scopeName=All+repos&scope=&q=test1%20test2%20test3%20test4%20test5");
 });
 
 test('unknown logical flight', async () => {
@@ -153,7 +258,8 @@ test('unknown logical flight', async () => {
         identifier: "notreal",
         values: []
     };
-    const response = await handleFlight(flight);
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
 
     // @ts-ignore
     expect(response["message"]).toBe("Logic Not Found");
@@ -169,7 +275,8 @@ test('aws flight has 0 parameters', async () => {
         override: "override",
         values: []
     };
-    const response = await handleFlight(flight);
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
 
     // @ts-ignore
     expect(response["link"]).toBe("override");
@@ -185,7 +292,8 @@ test('aws flight has 1 parameters', async () => {
         override: "override",
         values: ["us-east-1"]
     };
-    const response = await handleFlight(flight);
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
 
     // @ts-ignore
     expect(response["link"]).toBe("https://console.aws.amazon.com/console/home?region=us-east-1");
@@ -201,10 +309,11 @@ test('aws flight has 2 parameters', async () => {
         override: "override",
         values: ["us-east-1", "us-east-2"]
     };
-    const response = await handleFlight(flight);
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
 
     // @ts-ignore
-    expect(response["link"]).toBe("https://console.aws.amazon.com/console/home?region=us-east-1");
+    expect(response["link"]).toBe("override");
 });
 
 test('aws flight has 0 parameters, region is set', async () => {
@@ -217,7 +326,8 @@ test('aws flight has 0 parameters, region is set', async () => {
         override: "override",
         values: []
     };
-    const response = await handleFlight(flight);
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
 
     // @ts-ignore
     expect(response["link"]).toBe("https://console.aws.amazon.com/console/home?region=region-ls");
@@ -233,7 +343,8 @@ test('aws flight has 1 parameters, region is set', async () => {
         override: "override",
         values: ["us-east-1"]
     };
-    const response = await handleFlight(flight);
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
 
     // @ts-ignore
     expect(response["link"]).toBe("https://console.aws.amazon.com/console/home?region=us-east-1");
@@ -249,36 +360,39 @@ test('aws flight has 2 parameters, region is set', async () => {
         override: "override",
         values: ["us-east-1", "us-east-2"]
     };
-    const response = await handleFlight(flight);
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
 
     // @ts-ignore
-    expect(response["link"]).toBe("https://console.aws.amazon.com/console/home?region=region-ls");
+    expect(response["link"]).toBe("override");
 });
 
-test('datadog standard flight', async () => {
+test('google standard flight', async () => {
     mockRedirect();
     mockGetLocalStorageWithoutResult();
 
     const flight: Flight = {
         type: FlightType.STANDARD,
-        identifier: "datadog"
+        identifier: "google"
     };
-    const response = await handleFlight(flight);
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
 
     // @ts-ignore
-    expect(response["link"]).toBe("https://app.datadoghq.com/");
+    expect(response["link"]).toBe("https://google.com/");
 });
 
-test('dd standard flight', async () => {
+test('go standard flight', async () => {
     mockRedirect();
     mockGetLocalStorageWithoutResult();
 
     const flight: Flight = {
         type: FlightType.STANDARD,
-        identifier: "dd"
+        identifier: "go"
     };
-    const response = await handleFlight(flight);
+    const flightPlans = await getFlightPlans();
+    const response = await handleFlight(flight, flightPlans);
 
     // @ts-ignore
-    expect(response["link"]).toBe("https://app.datadoghq.com/");
+    expect(response["link"]).toBe("https://google.com/");
 });

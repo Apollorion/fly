@@ -1,6 +1,6 @@
 import {
     FlightType,
-    Flight
+    Flight, FlightPlans
 } from "./types.js";
 
 import {
@@ -8,9 +8,11 @@ import {
     setCalled,
     unsetCalled,
     redirect,
-    checkRepoFlights,
-    getNewFlightResponseSynchronous,
-    repoManagement
+    getFlightPlans,
+    repoManagement,
+    makeType,
+    getValue,
+    getType
 } from "./helpers.js";
 
 import {getLocalStorage } from "./localstorage.js";
@@ -27,103 +29,127 @@ export async function main() {
             let resp = await repoManagement(query);
             console.log(resp);
         } else {
-            const repoFlightResponse = await checkRepoFlights();
-            const flight = await getFlightFromQuery(query, repoFlightResponse);
-            await handleFlight(flight);
+            const flightPlans = await getFlightPlans();
+            const flight = await getFlightFromQuery(query, flightPlans);
+            await handleFlight(flight, flightPlans);
         }
     });
 }
 
-export async function handleStandardFlight(flight: Flight){
-    const repoFlightResponse = await checkRepoFlights();
-    let newFlights = getNewFlightResponseSynchronous(repoFlightResponse);
-    const newStandardFlights = newFlights.standard;
-
-    for(let key in newStandardFlights){
-        for(let value of newStandardFlights[key]){
+export async function handleStandardFlight(flight: Flight, flightPlans: FlightPlans){
+    const standardFlightPlans = flightPlans.standard;
+    for(let key in standardFlightPlans){
+        for(let value of standardFlightPlans[key]){
             if(value === flight.identifier){
                 return await redirect(`Following Link`, key);
             }
         }
     }
 
-    await redirect("Not a standard flight", "https://github.com/Apollorion/fly");
+    // Send user to page defining that the flight was not found
+    await redirect("Not a standard flight", "https://github.com/Apollorion/fly/blob/main/help/flight-not-found.md");
 }
 
-export async function handleFlight(flight: Flight){
-    const repoFlightResponse = await checkRepoFlights();
-    let newFlights = getNewFlightResponseSynchronous(repoFlightResponse);
-    const newLogicalFlights = newFlights.logical;
+export async function handleFlight(flight: Flight, flightPlans: FlightPlans): Promise<any> {
+    const logicalFlightPlans = flightPlans.logical;
 
     if(flight.type === FlightType.LOGICAL && flight.values !== undefined) {
-        if (flight.identifier in newLogicalFlights) {
-            let flightDetails = newLogicalFlights[flight.identifier];
-            let logic = flightDetails["logic"];
+        if (flight.identifier in logicalFlightPlans) {
+            let flightDetails = logicalFlightPlans[flight.identifier];
+            let logics = flightDetails["logic"];
 
-            // Regex that match everything inside ${}
-            let regex = /\${([^}]*)}/g;
-            let matches = logic.match(regex);
+            let highMatches = 0;
+            for (let logic of logics) {
 
-            if(matches === null) {
-                console.log("Matches is null");
+                let flightValueCounter = flight.values.length;
 
-            // If the length of matches and the flight values are the same
-            // The user wants to supply all the values
-            } else if (matches.length === flight.values.length) {
-                let i = 0;
-                for(let match of matches){
-                    const value = flight.values[i];
-                    if(value !== undefined) {
-                        logic = logic.replace(match, value);
-                        i++;
-                    }
+                // Regex that match everything inside ${}
+                let regex = /\${([^}]*)}/g;
+                let matches = logic.match(regex);
+
+                // determine which logic block has the most amount of logic
+                if(matches !== null && matches.length > highMatches){
+                    highMatches = matches.length;
                 }
 
-            } else {
-                for(let match of matches){
-                    try {
-                        const matchNoBrackets = match.replace("${", "").replace("}", "");
-                        const value = await getLocalStorage(matchNoBrackets);
-                        if(value !== undefined) {
-                            logic = logic.replace(match, value);
-
-                            // Remove the item from the array, so we can replace using the values of the flight later
-                            const index = matches.indexOf(match);
-                            if (index > -1) {
-                                matches.splice(index, 1); // 2nd parameter means remove one item only
-                            }
+                if (matches === null) {
+                    console.log("Matches is null");
+                } else if (matches.length === flight.values.length) {
+                    // If the length of matches and the flight values are the same
+                    // The user wants to supply all the values
+                    let i = 0;
+                    for (let match of matches) {
+                        const value = flight.values[i];
+                        if (value !== undefined) {
+                            logic = logic.replace(match, makeType(value, getType(match)));
+                            flightValueCounter--;
+                            i++;
                         }
-                    } catch {
-                        console.log("Could not find value for: " + match);
+                    }
+
+                } else {
+                    // If the length of matches and the flight values are not the same
+                    // we will check local storage for any saved values
+                    for (let match of matches) {
+                        try {
+                            const matchNoBrackets = getValue(match);
+                            const value = await getLocalStorage(matchNoBrackets);
+                            if (value !== undefined) {
+                                logic = logic.replace(match, makeType(value, getType(match)));
+
+                                //Remove the item from the array, so we can replace using the values of the flight later
+                                const index = matches.indexOf(match);
+                                if (index > -1) {
+                                    matches.splice(index, 1); // 2nd parameter means remove one item only
+                                }
+                            }
+                        } catch {
+                            console.log("Could not find value for: " + match);
+                        }
+                    }
+
+                    // If there are still matches left, we will treat them as positional variables
+                    let i = 0
+                    for (let match of matches) {
+                        const value = flight.values[i];
+                        if (value !== undefined) {
+                            logic = logic.replace(match, makeType(value, getType(match)));
+                            flightValueCounter--;
+                            i++;
+                        }
                     }
                 }
 
-                // If there are still matches left, we will treat them as positional variables
-                let i = 0;
-                for(let match of matches){
-                    const value = flight.values[i];
-                    if(value !== undefined) {
-                        logic = logic.replace(match, value);
-                        i++;
+                // If there are no more variables to replace, follow the link
+                if (!logic.includes("${") && !logic.includes("}") && flightValueCounter === 0) {
+                    return await redirect("Following Link", logic);
+                }
+            }
+
+            if(flight.values.length > highMatches){
+                let lastLogic = logics.at(-1);
+                if(lastLogic !== undefined) {
+                    let lastOccurrence = lastLogic.lastIndexOf("}");
+                    if (lastLogic.substring(lastOccurrence - 9, lastOccurrence) === "urlencode") {
+                        flight.values = [flight.values.join(" ")]
+                        return handleFlight(flight, flightPlans)
                     }
                 }
             }
 
-            if(logic.includes("${") && logic.includes("}")){
-                if(flight.override !== undefined) {
-                    return await redirect("override flight", flight.override);
-                } else {
-                    return await redirect("Incorrect Length", "https://github.com/Apollorion/fly/blob/main/help/logical-logicalFlights.md#incorrect-length");
-                }
+            // If we havent found any matching logic
+            // check for a flight override or error.
+            if (flight.override !== undefined) {
+                return await redirect("override flight", flight.override);
             } else {
-                return await redirect("Following Link", logic);
+                return await redirect("Incorrect Length", "https://github.com/Apollorion/fly/blob/main/help/incorrect-length.md");
             }
 
         } else {
-            return await redirect("Logic Not Found", "https://github.com/Apollorion/fly/blob/main/help/logical-logicalFlights.md#logic-not-found");
+            return await redirect("Logic Not Found", "https://github.com/Apollorion/fly/blob/main/help/flight-not-found.md");
         }
     } else {
-        return await handleStandardFlight(flight);
+        return await handleStandardFlight(flight, flightPlans);
     }
 
 }
