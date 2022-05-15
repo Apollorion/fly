@@ -1,23 +1,24 @@
-import {Flight, FlightType, LogicalFlightDefinition, StandardFlightDefinition, RepoFlightsResponse} from "./types.js";
+import {Flight, FlightType, FlightPlans} from "./types.js";
 import {logicalFlights, standardFlights} from "./flights.js";
 import {setLocalStorage, getLocalStorage, unsetLocalStorage} from "./localstorage.js";
 
-export async function getFlightFromQuery(query: string[], repoFlightResponse: RepoFlightsResponse | undefined): Promise<Flight> {
+const supportedCustomFlightVersion = "2";
+
+export async function getFlightFromQuery(query: string[], flightPlans: FlightPlans): Promise<Flight> {
     // Remove null items from values
     query = query.filter(function (el) {
         return el != null;
     });
 
-    const newFlights = getNewFlightResponseSynchronous(repoFlightResponse);
-    const newLogicalFlights = newFlights.logical;
+    const logicalFlightPlans = flightPlans.logical;
 
-    if(query[0] in newLogicalFlights){
+    if(query[0] in logicalFlightPlans){
         const identifier = query[0];
         query.shift();
 
         let d = undefined;
-        if(newLogicalFlights[identifier].override !== undefined){
-            d = newLogicalFlights[identifier].override;
+        if(logicalFlightPlans[identifier].override !== undefined){
+            d = logicalFlightPlans[identifier].override;
         }
 
         return {
@@ -34,45 +35,33 @@ export async function getFlightFromQuery(query: string[], repoFlightResponse: Re
     }
 }
 
-export function getNewFlightResponseSynchronous(repoFlightResponse: RepoFlightsResponse | undefined) : RepoFlightsResponse{
-    let newLogicalFlights: LogicalFlightDefinition;
-    if(repoFlightResponse !== undefined) {
-        newLogicalFlights = {
-            ...logicalFlights,
-            ...repoFlightResponse.logical
-        }
-    } else {
-        newLogicalFlights = {
-            ...logicalFlights
+export async function getFlightPlans(): Promise<FlightPlans>{
+    let localFlights = undefined;
+    try {
+        const jsonString = await getLocalStorage("updated-repos");
+        localFlights = JSON.parse(jsonString);
+    } catch (e) {
+        console.log("No custom repo set", e);
+    }
+
+    if(localFlights === undefined){
+        return {
+            logical: logicalFlights,
+            standard: standardFlights
         }
     }
 
-    let newStandardFlights: StandardFlightDefinition;
-    if(repoFlightResponse !== undefined) {
-        newStandardFlights = {
-            ...standardFlights,
-            ...repoFlightResponse.standard
-        }
-    } else {
-        newStandardFlights = {
-            ...standardFlights
+    if(localFlights.version !== supportedCustomFlightVersion){
+        console.log("Unsupported local flight version");
+        return {
+            logical: logicalFlights,
+            standard: standardFlights
         }
     }
 
     return {
-        logical: newLogicalFlights,
-        standard: newStandardFlights
-    }
-
-}
-
-export async function checkRepoFlights(): Promise<RepoFlightsResponse | undefined>{
-    try {
-        const jsonString = await getLocalStorage("updated-repos");
-        return JSON.parse(jsonString);
-    } catch (e) {
-        console.log("No custom repo set", e);
-        return undefined;
+        logical: { ...logicalFlights, ...localFlights.logical },
+        standard: { ...standardFlights, ...localFlights.standard }
     }
 }
 
@@ -127,16 +116,18 @@ export async function repoManagement(query: string[]): Promise<string> {
         case "update":
             try {
                 repoResult = await getLocalStorage("repos");
+                console.log(repoResult);
             } catch {
                 repoResult = "{}";
             }
             repos = JSON.parse(repoResult);
 
-            let newRepoContent = {standard: {}, logical: {}};
+            let newRepoContent = {standard: {}, logical: {}, version: supportedCustomFlightVersion};
             for(let name in repos){
                 try {
                     let json = JSON.parse(await requestJson(repos[name]));
-                    if(json.version === "1" && Object.keys(json).includes("logical") && Object.keys(json).includes("standard")){
+                    if(Object.keys(json).includes("version") && json.version === supportedCustomFlightVersion
+                        && Object.keys(json).includes("logical") && Object.keys(json).includes("standard")){
                         newRepoContent.standard = {...newRepoContent.standard, ...json.standard};
                         newRepoContent.logical = {...newRepoContent.logical, ...json.logical};
                     }
@@ -151,6 +142,24 @@ export async function repoManagement(query: string[]): Promise<string> {
     }
 }
 
+export function makeType(value: string, type: string): string {
+    switch(type){
+        case "plain":
+            return value;
+        case "urlencode":
+            return encodeURIComponent(value);
+        default:
+            throw new Error("Type not found");
+    }
+}
+
+export function getType(value: string): string {
+    return value.replace("}", "").split(":")[1]
+}
+
+export function getValue(value: string): string {
+    return value.replace("${", "").split(":")[0]
+}
 
 export async function setCalled(query: string[]){
     if(query.length === 3){

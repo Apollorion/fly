@@ -1,11 +1,15 @@
 import { repoManagement } from './helpers';
 import {setLocalStorage, getLocalStorage} from "./localstorage.js";
 
-function mockGetLocalStorageWithResult() {
+function mockGetLocalStorageWithResult(type: string) {
     // @ts-ignore
     getLocalStorage = jest.fn(async (key) => {
         return new Promise((resolve, reject) => {
-            resolve("{}");
+            if(type === "good"){
+                resolve("{}");
+            } else {
+                resolve("{\"apollorion\": \"https://apollorion.com/flight_repo.json\"}");
+            }
         });
     });
 }
@@ -25,7 +29,7 @@ function mockSetLocalStorage() {
 }
 
 test("repo can set", async () => {
-    mockGetLocalStorageWithResult();
+    mockGetLocalStorageWithResult("good");
     mockSetLocalStorage();
 
     const result = await repoManagement(["repo", "set", "apollorion", "https://apollorion.com/flight_repo.json"]);
@@ -33,7 +37,7 @@ test("repo can set", async () => {
 });
 
 test("repo can unset", async () => {
-    mockGetLocalStorageWithResult();
+    mockGetLocalStorageWithResult("good");
     mockSetLocalStorage();
 
     const result = await repoManagement(["repo", "unset", "apollorion"]);
@@ -41,11 +45,21 @@ test("repo can unset", async () => {
 });
 
 test("repo can update", async () => {
-    mockGetLocalStorageWithResult();
+    mockGetLocalStorageWithResult("good");
     mockSetLocalStorage();
 
     const result = await repoManagement(["repo", "update"]);
     expect(result).toBe("repos updated");
+});
+
+test("repo cannot update", async () => {
+    mockGetLocalStorageWithResult("bad");
+    mockSetLocalStorage();
+    console.log = jest.fn();
+
+    const result = await repoManagement(["repo", "update"]);
+    expect(result).toBe("repos updated");
+    expect(console.log).toHaveBeenCalledWith('Failed to fetch repo apollorion');
 });
 
 test("repo set no local storage", async () => {

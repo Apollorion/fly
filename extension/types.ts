@@ -12,7 +12,7 @@ export interface Flight {
 
 export interface LogicalFlightDefinition {
     [key: string]: {
-        logic: string,
+        logic: string[],
         override?: string
     }
 }
@@ -21,7 +21,7 @@ export interface StandardFlightDefinition {
     [key: string]: string[]
 }
 
-export interface RepoFlightsResponse {
+export interface FlightPlans {
     logical: LogicalFlightDefinition,
     standard: StandardFlightDefinition
 }
