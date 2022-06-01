@@ -73,6 +73,25 @@ async function requestJson(url: string): Promise<string> {
     });
 }
 
+export async function setHistory(history: string[]){
+    await setLocalStorage("history", JSON.stringify(history))
+}
+
+export async function getHistory(query: string[]): Promise<string[]> {
+    let history;
+
+    try {
+        history = await getLocalStorage("history");
+        history = [...JSON.parse(history)];
+        history.push(query.join(" "));
+        history = [...new Set(history)]
+    } catch (e) {
+        history = [query.join(" ")];
+    }
+
+   return history;
+}
+
 export async function repoManagement(query: string[]): Promise<string> {
     query.shift();
     const action = query[0];

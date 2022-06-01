@@ -12,14 +12,20 @@ import {
     repoManagement,
     makeType,
     getValue,
-    getType
+    getType,
+    getHistory,
+    setHistory
 } from "./helpers.js";
 
 import {getLocalStorage } from "./localstorage.js";
+import SuggestResult = chrome.omnibox.SuggestResult;
 
 export async function main() {
-    // @ts-ignore
     chrome.omnibox.onInputEntered.addListener(async (text, OnInputEnteredDisposition) => {
+        if(chrome.runtime.lastError) {
+            console.warn("Whoops.. " + chrome.runtime.lastError.message);
+        }
+
         const query = text.split(" ");
         if(query[0] === "set"){
             await setCalled(query);
@@ -29,9 +35,37 @@ export async function main() {
             let resp = await repoManagement(query);
             console.log(resp);
         } else {
-            const flightPlans = await getFlightPlans();
-            const flight = await getFlightFromQuery(query, flightPlans);
-            await handleFlight(flight, flightPlans);
+            const history = await getHistory(query);
+            setHistory(history).then(async () => {
+                const flightPlans = await getFlightPlans();
+                const flight = await getFlightFromQuery(query, flightPlans);
+                await handleFlight(flight, flightPlans);
+            });
+        }
+    });
+
+    chrome.omnibox.onInputChanged.addListener(async (text, suggest) => {
+        if(chrome.runtime.lastError) {
+            console.warn("Whoops.. " + chrome.runtime.lastError.message);
+        }
+        const query = text.split(" ");
+        if(!["set", "unset", "repo"].includes(query[0])){
+            const history = await getHistory([]);
+            const initialSuggestions = history.map((item: string) => {
+                if (item !== "" && item.toLowerCase().includes(text.toLowerCase())) {
+                    return {
+                        content: item,
+                        description: item
+                    };
+                }
+            });
+            const filtered = initialSuggestions.filter(function (x: any) {
+                return x !== undefined;
+            }) as SuggestResult[];
+
+            if(filtered.length > 0){
+                suggest(filtered);
+            }
         }
     });
 }
