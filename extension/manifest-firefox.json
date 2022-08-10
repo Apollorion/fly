@@ -9,7 +9,9 @@
   "icons": {
     "16": "16.png",
     "32": "32.png",
-    "64": "64.png"
+    "48": "48.png",
+    "64": "64.png",
+    "96": "96.png"
   },
   "permissions": [
     "storage"
