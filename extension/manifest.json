@@ -7,9 +7,9 @@
     "keyword": "fly"
   },
   "icons": {
-    "16": "img.png",
-    "32": "img.png",
-    "64": "img.png"
+    "16": "16.png",
+    "32": "32.png",
+    "64": "64.png"
   },
   "permissions": [
     "storage"

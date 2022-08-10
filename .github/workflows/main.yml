@@ -54,7 +54,9 @@ jobs:
           cp LICENSE ./dist/
           envsubst < ./extension/manifest.json > ./dist/manifest.json
           envsubst < ./extension/manifest-firefox.json > ./dist/manifest-firefox.json
-          cp ./extension/img.png ./dist/img.png
+          cp ./extension/16.png ./dist/16.png
+          cp ./extension/32.png ./dist/32.png
+          cp ./extension/64.png ./dist/64.png
           cp ./extension/background.html ./dist/background.html
           cd ./dist
           
