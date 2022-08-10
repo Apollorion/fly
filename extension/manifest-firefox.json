@@ -1,0 +1,25 @@
+{
+  "name": "Fly",
+  "description": "Software engineer quicklinks.",
+  "version": "$FLY_RELEASE_VERSION",
+  "manifest_version": 2,
+  "omnibox": {
+    "keyword": "fly"
+  },
+  "icons": {
+    "16": "img.png",
+    "32": "img.png",
+    "64": "img.png"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "background": {
+    "page": "background.html"
+  },
+  "applications": {
+    "gecko": {
+      "id": "fly@apollorion.com"
+    }
+  }
+}
