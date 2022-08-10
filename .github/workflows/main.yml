@@ -55,6 +55,7 @@ jobs:
           envsubst < ./extension/manifest.json > ./dist/manifest.json
           envsubst < ./extension/manifest-firefox.json > ./dist/manifest-firefox.json
           cp ./extension/img.png ./dist/img.png
+          cp ./extension/background.html ./dist/background.html
           cd ./dist
           
           # Build Zip for Chrome
