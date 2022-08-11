@@ -70,9 +70,7 @@ jobs:
           rm manifest.json
           mv manifest-firefox.json manifest.json
           web-ext sign --channel=listed --api-key=${{secrets.WEB_EXT_API_KEY }} --api-secret=${{ secrets.WEB_EXT_API_SECRET }}
-          file=$(ls ./web-ext-artifacts/)
-          mv ./web-ext-artifacts/$file ../firefox-extension.xpi
-          
+          zip -r -FS ../firefox-extension.xpi *
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         if: startsWith(github.ref, 'refs/tags/')
