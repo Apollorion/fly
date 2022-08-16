@@ -18,7 +18,7 @@ Now, with fly, I can just use the fly extension to do `fly tfc` and it will take
 
 # Installation
 
-Install on [Chrome Web Store](https://chrome.google.com/webstore/detail/fly/nafhoogklliiodhpleeblaafahecnpcp).
+Install on [Chrome Web Store](https://chrome.google.com/webstore/detail/fly/nafhoogklliiodhpleeblaafahecnpcp).  
 Install on [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/fly-engineers/).
 
 If you want to install the latest unreleased version:
