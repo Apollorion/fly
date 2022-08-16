@@ -4,8 +4,6 @@
 <p align="center">FLY - Software engineer quicklinks.</p>
 <p align="center">http://fly.apollorion.com/</p>
 
-[![main](https://github.com/Apollorion/fly/actions/workflows/main.yml/badge.svg)](https://github.com/Apollorion/fly/actions/workflows/main.yml)
-
 # What is FLY?
 Im an engineer and it annoys me that I have to go through a sales portal to get where I need.  
 
